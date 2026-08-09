@@ -104,7 +104,9 @@ export default function App() {
   /* ------------------------------ tema ------------------------------ */
   useEffect(() => {
     const tema = data.settings?.theme || "auto";
-    document.documentElement.setAttribute("data-theme", tema);
+    // `data-tema` y no `data-theme`: hay entornos que embeben la app y usan
+    // ese atributo para su propio modo claro/oscuro.
+    document.documentElement.setAttribute("data-tema", tema);
   }, [data.settings?.theme]);
 
   /* ----------------------- instalación y avisos ---------------------- */

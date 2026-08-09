@@ -32,12 +32,11 @@
   --mono: "DM Mono", ui-monospace, Menlo, monospace;
 }
 
-html[data-theme="oscuro"],
-html[data-theme="oscuro"] body {
+/* El tema propio va en `data-tema`. `data-theme` es el que ponen algunos
+   entornos que embeben la app; se respeta salvo que aquí se haya fijado uno. */
+html[data-tema="oscuro"],
+html[data-theme="dark"]:not([data-tema="claro"]) {
   color-scheme: dark;
-}
-
-html[data-theme="oscuro"] {
   --bg: #101613;
   --card: #1a221d;
   --text: #e9efe7;
@@ -58,7 +57,7 @@ html[data-theme="oscuro"] {
 }
 
 @media (prefers-color-scheme: dark) {
-  html:not([data-theme="claro"]) {
+  html:not([data-tema="claro"]):not([data-theme="light"]) {
     color-scheme: dark;
     --bg: #101613;
     --card: #1a221d;

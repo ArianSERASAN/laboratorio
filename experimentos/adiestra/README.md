@@ -27,6 +27,8 @@ npm run dev      # desarrollo en http://localhost:5173
 npm run build    # compila a dist/ y sella el service worker
 npm run preview  # sirve dist/ para probar la versión final
 npm run icons    # regenera los PNG del icono (sólo si cambia el diseño)
+
+npm run build:single  # empaqueta todo en dist-single/cuaderno-de-campo.html
 ```
 
 El service worker sólo entra en juego en la versión compilada; en `npm run dev`
@@ -51,6 +53,18 @@ A partir de ahí abre a pantalla completa, con su icono, y funciona en el campo
 aunque no haya cobertura. Vale cualquier otro alojamiento estático (Netlify,
 Vercel, un hosting propio): las rutas son relativas y no dependen de estar en
 la raíz del dominio.
+
+### Un solo archivo
+
+`npm run build:single` deja la app entera —código, estilos, tipografías e
+iconos— dentro de `dist-single/cuaderno-de-campo.html`. Es la versión para
+llevársela por correo, dejarla en iCloud Drive o subirla a cualquier sitio sin
+tocar nada más.
+
+A cambio pierde el manifest y el service worker, es decir, la instalación con
+icono propio y el funcionamiento sin conexión: para eso hay que servir la
+carpeta `dist/` completa. Los datos que se guarden en esa copia son suyos, de
+la dirección desde la que se abra; no se comparten con el despliegue normal.
 
 ---
 
