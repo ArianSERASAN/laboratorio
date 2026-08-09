@@ -1,12 +1,13 @@
 import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Plus, Download } from "lucide-react";
-import { Empty } from "../ui/components.jsx";
+import { Empty, Segmented } from "../ui/components.jsx";
 import { SessionRow } from "../ui/SessionRow.jsx";
 import { clientOf } from "../lib/model.js";
-import { MONTHS, DOW, monthMatrix, todayISO, parseISO, fmtFull, isoOf } from "../lib/dates.js";
-import { cls } from "../lib/format.js";
+import { MONTHS, DOW, monthMatrix, todayISO, parseISO, fmtFull, isoOf, addDays } from "../lib/dates.js";
+import { cls, capitalizar } from "../lib/format.js";
 
 export function Agenda({ data, act, openSession, newSessionOn }) {
+  const [vista, setVista] = useState("mes");
   const [cur, setCur] = useState(() => {
     const d = new Date();
     return { y: d.getFullYear(), m: d.getMonth() };
@@ -38,8 +39,48 @@ export function Agenda({ data, act, openSession, newSessionOn }) {
     setSel(isoOf(d));
   };
 
+  const semana = Array.from({ length: 7 }, (_, i) => {
+    const iso = addDays(hoy, i);
+    return { iso, sesiones: (porDía[iso] || []).slice().sort((a, b) => a.time.localeCompare(b.time)) };
+  });
+
+  const fila = (s) => (
+    <SessionRow
+      key={s.id}
+      session={s}
+      client={clientOf(data, s.clientId)}
+      onOpen={() => openSession(s)}
+      onToggleDone={() => act.toggleDone(s)}
+      onCalendar={() => act.exportSessions([s])}
+    />
+  );
+
   return (
     <div className="view">
+      <Segmented
+        value={vista}
+        onChange={setVista}
+        options={[["mes", "Mes"], ["semana", "Próximos 7 días"]]}
+      />
+
+      {vista === "semana" && (
+        <>
+          {semana.map(({ iso, sesiones }) => (
+            <div key={iso} className="daygroup">
+              <div className="daybar">
+                <h3 className="sec">{iso === hoy ? "Hoy" : capitalizar(fmtFull(iso))}</h3>
+                <button type="button" className="icon-btn" onClick={() => newSessionOn(iso)} aria-label={`Nueva sesión el ${fmtFull(iso)}`}>
+                  <Plus size={17} />
+                </button>
+              </div>
+              {sesiones.length === 0 ? <p className="muted">Libre.</p> : sesiones.map(fila)}
+            </div>
+          ))}
+        </>
+      )}
+
+      {vista === "mes" && (
+      <>
       <div className="mnav">
         <button type="button" className="icon-btn" onClick={() => mover(-1)} aria-label="Mes anterior">
           <ChevronLeft size={20} />
@@ -90,25 +131,14 @@ export function Agenda({ data, act, openSession, newSessionOn }) {
       </div>
 
       <div className="daybar">
-        <h3 className="sec">{fmtFull(sel)}</h3>
+        <h3 className="sec">{capitalizar(fmtFull(sel))}</h3>
         <button type="button" className="btn small" onClick={() => newSessionOn(sel)}>
           <Plus size={15} /> Sesión
         </button>
       </div>
 
-      {delDía.length === 0 ? (
-        <Empty title="Día libre." />
-      ) : (
-        delDía.map((s) => (
-          <SessionRow
-            key={s.id}
-            session={s}
-            client={clientOf(data, s.clientId)}
-            onOpen={() => openSession(s)}
-            onToggleDone={() => act.toggleDone(s)}
-            onCalendar={() => act.exportSessions([s])}
-          />
-        ))
+      {delDía.length === 0 ? <Empty title="Día libre." /> : delDía.map(fila)}
+      </>
       )}
 
       {futuras.length > 0 && (

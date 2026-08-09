@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Download, Upload, Share2, HardDriveDownload, Check, TriangleAlert } from "lucide-react";
-import { Sheet, Segmented, Confirm } from "../ui/components.jsx";
+import { Sheet, Segmented, Confirm, Field } from "../ui/components.jsx";
 import { listSnapshots, requestPersistence, storageInfo } from "../lib/storage.js";
 import { backupName, toBackupJSON, parseBackup, countOf } from "../lib/backup.js";
 import { downloadText, shareText, canShareFiles, readFileAsText } from "../lib/files.js";
@@ -23,6 +23,7 @@ export function Ajustes({ data, act, onClose, installPrompt, standalone }) {
   }, []);
 
   const cuentas = countOf(data);
+  const defaults = data.settings?.defaults || {};
   const json = () => toBackupJSON(data);
 
   const exportar = () => {
@@ -100,9 +101,9 @@ export function Ajustes({ data, act, onClose, installPrompt, standalone }) {
                 type="button"
                 className="btn"
                 onClick={() => {
-                  const n = act.mergeIn(importado);
+                  act.mergeIn(importado);
                   setImportado(null);
-                  act.toast(`Añadidos ${n} registros nuevos.`);
+                  onClose();
                 }}
               >
                 Fusionar
@@ -113,7 +114,7 @@ export function Ajustes({ data, act, onClose, installPrompt, standalone }) {
                 onClick={() => {
                   act.replaceAll(importado);
                   setImportado(null);
-                  act.toast("Cuaderno restaurado.");
+                  onClose();
                 }}
               >
                 Reemplazar todo
@@ -155,7 +156,7 @@ export function Ajustes({ data, act, onClose, installPrompt, standalone }) {
             onConfirm={() => {
               act.replaceAll(restaurar.data);
               setRestaurar(null);
-              act.toast("Copia restaurada.");
+              onClose();
             }}
           />
         )}
@@ -191,6 +192,41 @@ export function Ajustes({ data, act, onClose, installPrompt, standalone }) {
           </strong>
         </div>
         <p className="hint">Clientes · sesiones · bonos · cobros.</p>
+      </section>
+
+      <section className="set-block">
+        <h3 className="sec">Valores por defecto</h3>
+        <p className="hint">Con lo que se rellena una sesión nueva, para no teclear siempre lo mismo.</p>
+        <div className="row">
+          <Field label="Duración (min)">
+            <input
+              type="number"
+              min="15"
+              step="15"
+              inputMode="numeric"
+              value={defaults.duration ?? 60}
+              onChange={(e) => act.patchDefaults({ duration: Number(e.target.value) || 60 })}
+            />
+          </Field>
+          <Field label="Precio suelto">
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              inputMode="decimal"
+              placeholder="45"
+              value={defaults.price ?? ""}
+              onChange={(e) => act.patchDefaults({ price: e.target.value })}
+            />
+          </Field>
+        </div>
+        <Field label="Lugar habitual">
+          <input
+            placeholder="Parque del Oeste"
+            value={defaults.place ?? ""}
+            onChange={(e) => act.patchDefaults({ place: e.target.value })}
+          />
+        </Field>
       </section>
 
       <section className="set-block">
@@ -240,7 +276,7 @@ export function Ajustes({ data, act, onClose, installPrompt, standalone }) {
             onConfirm={() => {
               act.wipe();
               setBorrarTodo(false);
-              act.toast("Cuaderno vacío.");
+              onClose();
             }}
           />
         )}

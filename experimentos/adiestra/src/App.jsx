@@ -18,7 +18,7 @@ import { EMPTY, normalize, uid, clientOf } from "./lib/model.js";
 import { loadState, saveState, saveStateSync, snapshotOncePerDay, requestPersistence } from "./lib/storage.js";
 import { buildICS, sessionEvent, followupEvent } from "./lib/ics.js";
 import { downloadText } from "./lib/files.js";
-import { mergeData } from "./lib/backup.js";
+import { mergeData, toCSV } from "./lib/backup.js";
 import { todayISO, addDays, nowStamp } from "./lib/dates.js";
 import { cls } from "./lib/format.js";
 
@@ -120,6 +120,7 @@ export default function App() {
         text: "Hay una versión nueva.",
         actionLabel: "Actualizar",
         onAction: () => window.location.reload(),
+        sticky: true,
       });
     window.addEventListener("beforeinstallprompt", alPoderInstalar);
     window.addEventListener("sw-update", alActualizar);
@@ -130,8 +131,8 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!toast || toast.actionLabel) return;
-    const t = setTimeout(() => setToast(null), 3200);
+    if (!toast || toast.sticky) return;
+    const t = setTimeout(() => setToast(null), toast.actionLabel ? 7000 : 3200);
     return () => clearTimeout(t);
   }, [toast]);
 
@@ -139,13 +140,30 @@ export default function App() {
   const upsert = (list, item) =>
     list.some((x) => x.id === item.id) ? list.map((x) => (x.id === item.id ? item : x)) : [...list, item];
 
+  /**
+   * Cambio que se puede deshacer: guarda el cuaderno de antes y ofrece
+   * volver a él durante unos segundos. Para todo lo que borra.
+   */
+  const cambioReversible = (texto, fn) => {
+    const antes = latest.current;
+    setData(fn);
+    setToast({
+      text: texto,
+      actionLabel: "Deshacer",
+      onAction: () => {
+        setData(antes);
+        setToast({ text: "Restaurado." });
+      },
+    });
+  };
+
   const act = {
     toast: (text) => setToast({ text }),
 
     saveClient: (c) => setData((d) => ({ ...d, clients: upsert(d.clients, c) })),
 
     delClient: (id) =>
-      setData((d) => {
+      cambioReversible("Ficha eliminada.", (d) => {
         const sesiones = d.sessions.filter((s) => s.clientId === id).map((s) => s.id);
         return {
           ...d,
@@ -169,7 +187,7 @@ export default function App() {
       }),
 
     delBono: (id) =>
-      setData((d) => ({
+      cambioReversible("Bono eliminado.", (d) => ({
         ...d,
         bonos: d.bonos.filter((b) => b.id !== id),
         sessions: d.sessions.map((s) => (s.bonoId === id ? { ...s, bonoId: "" } : s)),
@@ -199,7 +217,7 @@ export default function App() {
     toggleDone: (s) => act.patchSession(s.id, { status: s.status === "hecha" ? "programada" : "hecha" }),
 
     delSession: (id) =>
-      setData((d) => ({
+      cambioReversible("Sesión eliminada.", (d) => ({
         ...d,
         sessions: d.sessions.filter((s) => s.id !== id),
         payments: d.payments.filter((p) => p.sessionId !== id),
@@ -208,26 +226,37 @@ export default function App() {
     saveFollow: (f) => setData((d) => ({ ...d, followups: upsert(d.followups, f) })),
     patchFollow: (id, patch) =>
       setData((d) => ({ ...d, followups: d.followups.map((f) => (f.id === id ? { ...f, ...patch } : f)) })),
-    delFollow: (id) => setData((d) => ({ ...d, followups: d.followups.filter((f) => f.id !== id) })),
+    delFollow: (id) =>
+      cambioReversible("Recordatorio eliminado.", (d) => ({ ...d, followups: d.followups.filter((f) => f.id !== id) })),
 
     addPayment: (p) => setData((d) => ({ ...d, payments: [...d.payments, p] })),
-    delPayment: (id) => setData((d) => ({ ...d, payments: d.payments.filter((p) => p.id !== id) })),
+    delPayment: (id) =>
+      cambioReversible("Cobro deshecho.", (d) => ({ ...d, payments: d.payments.filter((p) => p.id !== id) })),
     openPay: (target) => setSheet({ type: "pay", target }),
 
     patchSettings: (patch) => setData((d) => ({ ...d, settings: { ...d.settings, ...patch } })),
+    patchDefaults: (patch) =>
+      setData((d) => ({ ...d, settings: { ...d.settings, defaults: { ...d.settings.defaults, ...patch } } })),
 
-    replaceAll: (nuevo) => setData(normalize(nuevo)),
+    replaceAll: (nuevo) => cambioReversible("Cuaderno restaurado.", () => normalize(nuevo)),
     mergeIn: (entrante) => {
       const { merged, added } = mergeData(latest.current, entrante);
-      setData(merged);
-      return Object.values(added).reduce((a, n) => a + n, 0);
+      const n = Object.values(added).reduce((a, x) => a + x, 0);
+      cambioReversible(`Añadidos ${n} registros nuevos.`, () => merged);
     },
-    wipe: () => setData({ ...EMPTY, settings: latest.current.settings }),
+    wipe: () => cambioReversible("Cuaderno vacío.", (d) => ({ ...EMPTY, settings: d.settings })),
 
     exportSessions: (lista) => {
       const eventos = lista.map((s) => sessionEvent(s, clientOf(latest.current, s.clientId)));
       const nombre = lista.length === 1 ? `sesion-${lista[0].date}.ics` : "agenda-adiestramiento.ics";
       if (!downloadText(nombre, buildICS(eventos), "text/calendar")) setToast({ text: "No se ha podido crear el archivo." });
+    },
+    exportPayments: () => {
+      if (latest.current.payments.length === 0) {
+        setToast({ text: "Todavía no hay cobros que exportar." });
+        return;
+      }
+      downloadText(`cobros-${todayISO()}.csv`, toCSV(latest.current), "text/csv");
     },
     exportFollowups: (lista) => {
       const eventos = lista.map((f) => followupEvent(f, clientOf(latest.current, f.clientId)));
@@ -312,6 +341,7 @@ export default function App() {
             onBack={() => setClientOpen(null)}
             openSession={openSession}
             newSession={(id) => setSheet({ type: "session", presetClient: id })}
+            repeatSession={(plantilla) => setSheet({ type: "session", plantilla })}
             newBono={(id) => setSheet({ type: "bono", presetClient: id })}
             editBono={(b) => setSheet({ type: "bono", bono: b })}
             newFollow={(id) => setSheet({ type: "follow", presetClient: id })}
@@ -407,6 +437,7 @@ export default function App() {
           initial={sheet.session}
           presetClient={sheet.presetClient}
           presetDate={sheet.presetDate}
+          plantilla={sheet.plantilla}
           onSave={act.saveSession}
           onDelete={act.delSession}
           onClose={() => setSheet(null)}

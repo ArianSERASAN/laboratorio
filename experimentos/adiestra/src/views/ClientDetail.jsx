@@ -1,13 +1,15 @@
 import { useState } from "react";
-import { ChevronLeft, Phone, MessageCircle, Pencil, Trash2, Plus, Check, Calendar } from "lucide-react";
+import { ChevronLeft, Phone, MessageCircle, Pencil, Trash2, Plus, Check, Calendar, Repeat } from "lucide-react";
 import { Empty, Tag, Punch, Confirm } from "../ui/components.jsx";
 import {
-  clientOf, labelOfBono, debtOfBono, paidOfBono, usedOfBono, isSessionPaid, debtOfSession,
+  clientOf, labelOfBono, debtOfBono, paidOfBono, usedOfBono, isSessionPaid, debtOfSession, uid,
 } from "../lib/model.js";
-import { fmtShort } from "../lib/dates.js";
+import { fmtShort, todayISO, addDays } from "../lib/dates.js";
 import { money, cls, telHref, waHref } from "../lib/format.js";
 
-export function ClientDetail({ id, data, act, onBack, openSession, newSession, newBono, editBono, newFollow, editFollow, editClient }) {
+export function ClientDetail({
+  id, data, act, onBack, openSession, newSession, repeatSession, newBono, editBono, newFollow, editFollow, editClient,
+}) {
   const [askDel, setAskDel] = useState(false);
   const [bonoDel, setBonoDel] = useState(null);
 
@@ -20,6 +22,30 @@ export function ClientDetail({ id, data, act, onBack, openSession, newSession, n
     .sort((a, b) => (b.date + b.time).localeCompare(a.date + a.time));
   const avisos = data.followups.filter((f) => f.clientId === id && !f.done).sort((a, b) => a.date.localeCompare(b.date));
   const hechas = sesiones.filter((s) => s.status === "hecha");
+  const última = hechas[0]; // `sesiones` viene de más reciente a más antigua
+  const próxima = sesiones
+    .filter((s) => s.date >= todayISO() && s.status === "programada")
+    .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time))[0];
+
+  const resumen = [
+    hechas.length > 0 && `${hechas.length} ${hechas.length === 1 ? "sesión hecha" : "sesiones hechas"}`,
+    última && `última ${fmtShort(última.date)}`,
+    próxima && `próxima ${fmtShort(próxima.date)}`,
+  ].filter(Boolean);
+
+  /** Misma sesión de siempre, una semana después: el caso habitual. */
+  const repetirÚltima = () => {
+    const base = última || sesiones[0];
+    if (!base) return newSession(id);
+    const siguiente = addDays(base.date, 7);
+    repeatSession({
+      ...base,
+      id: uid(),
+      date: siguiente > todayISO() ? siguiente : todayISO(),
+      status: "programada",
+      notes: "",
+    });
+  };
 
   return (
     <div className="view">
@@ -39,6 +65,8 @@ export function ClientDetail({ id, data, act, onBack, openSession, newSession, n
           <p className="sub">{[c.breed, c.age].filter(Boolean).join(" · ") || "Sin datos de raza"}</p>
         </div>
       </div>
+
+      {resumen.length > 0 && <p className="statline mono small">{resumen.join(" · ")}</p>}
 
       <div className="guide">
         <span>
@@ -156,9 +184,16 @@ export function ClientDetail({ id, data, act, onBack, openSession, newSession, n
         <h3 className="sec">
           Historial <span className="badge">{hechas.length}</span>
         </h3>
-        <button type="button" className="btn small" onClick={() => newSession(id)}>
-          <Plus size={15} /> Sesión
-        </button>
+        <div className="quick">
+          {sesiones.length > 0 && (
+            <button type="button" className="btn small ghost" onClick={repetirÚltima}>
+              <Repeat size={15} /> Repetir
+            </button>
+          )}
+          <button type="button" className="btn small" onClick={() => newSession(id)}>
+            <Plus size={15} /> Sesión
+          </button>
+        </div>
       </div>
       {sesiones.length === 0 && <Empty title="Aún no hay sesiones." />}
       {sesiones.map((s) => {

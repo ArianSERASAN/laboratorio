@@ -515,6 +515,19 @@ p {
   justify-content: space-between;
   gap: 10px;
 }
+/* Cada día de la vista de semana, con sus sesiones debajo. */
+.daygroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.daygroup .sec {
+  margin-top: 0;
+}
+.statline {
+  color: var(--text2);
+  margin-top: -4px;
+}
 .foot-note {
   font-size: 12px;
   color: var(--text2);

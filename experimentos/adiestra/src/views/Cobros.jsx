@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Trash2 } from "lucide-react";
+import { Trash2, FileDown } from "lucide-react";
 import { Empty, Tag, Confirm } from "../ui/components.jsx";
 import { clientOf, labelOfBono, pendingList, totalDebt, incomeIn, totalIncome } from "../lib/model.js";
 import { todayISO, monthOf, fmtShort, fmtMonth, pad } from "../lib/dates.js";
@@ -75,6 +75,12 @@ export function Cobros({ data, act, openClient }) {
           </div>
         ))}
       </div>
+
+      {data.payments.length > 0 && (
+        <button type="button" className="btn ghost wide" onClick={act.exportPayments}>
+          <FileDown size={16} /> Exportar todos los cobros (CSV)
+        </button>
+      )}
 
       {cobros.length > 0 && (
         <>

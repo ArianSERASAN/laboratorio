@@ -11,6 +11,9 @@ export const moneyShort = (n) => {
 
 export const cls = (...parts) => parts.filter(Boolean).join(" ");
 
+/** Mayúscula sólo en la primera letra: "lunes 10 de agosto" → "Lunes 10 de agosto". */
+export const capitalizar = (t = "") => t.charAt(0).toUpperCase() + t.slice(1);
+
 /** Deja el teléfono en un formato marcable: sólo dígitos y el prefijo. */
 export const telHref = (phone) => `tel:${String(phone).replace(/[^\d+]/g, "")}`;
 

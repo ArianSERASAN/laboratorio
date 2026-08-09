@@ -1,7 +1,7 @@
 /* Copias de seguridad en un único archivo .json que se puede guardar en
  * iCloud, mandarse por correo o restaurar en otro móvil. */
 
-import { normalize, SCHEMA_VERSION } from "./model.js";
+import { normalize, SCHEMA_VERSION, labelOfBono } from "./model.js";
 import { todayISO } from "./dates.js";
 
 const COLLECTIONS = ["clients", "bonos", "sessions", "followups", "payments"];
@@ -37,6 +37,43 @@ export function mergeData(current, incoming) {
     added[key] = nuevos.length;
   });
   return { merged, added };
+}
+
+/**
+ * Cobros en CSV para la gestoría: punto y coma como separador y coma decimal,
+ * que es lo que espera el Excel en español. La marca inicial evita que se
+ * coman los acentos al abrirlo.
+ */
+export function toCSV(data) {
+  const campo = (v) => {
+    const t = String(v ?? "");
+    return /[";\n]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t;
+  };
+  const concepto = (p) => {
+    if (p.bonoId) {
+      const b = data.bonos.find((x) => x.id === p.bonoId);
+      return b ? labelOfBono(b) : "Bono eliminado";
+    }
+    const s = data.sessions.find((x) => x.id === p.sessionId);
+    return s ? `Sesión ${s.date}` : "Sesión suelta";
+  };
+
+  const filas = data.payments
+    .slice()
+    .sort((a, b) => String(a.date).localeCompare(String(b.date)))
+    .map((p) => {
+      const c = data.clients.find((x) => x.id === p.clientId);
+      return [
+        p.date,
+        c?.name || "",
+        c?.dogName || "",
+        concepto(p),
+        (Number(p.amount) || 0).toFixed(2).replace(".", ","),
+        p.method || "",
+      ].map(campo).join(";");
+    });
+
+  return "﻿" + ["Fecha;Guía;Perro;Concepto;Importe;Método", ...filas].join("\r\n") + "\r\n";
 }
 
 export const countOf = (data) => ({

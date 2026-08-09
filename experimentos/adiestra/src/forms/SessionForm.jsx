@@ -10,21 +10,24 @@ const REPEATS = [
   ["14", "Cada 15 días"],
 ];
 
-export function SessionForm({ data, initial, presetClient, presetDate, onSave, onDelete, onClose }) {
+export function SessionForm({ data, initial, presetClient, presetDate, plantilla, onSave, onDelete, onClose }) {
   const clients = data.clients;
+  const porDefecto = data.settings?.defaults || {};
   const [f, setF] = useState(
-    initial || {
-      id: uid(),
-      clientId: presetClient || clients[0]?.id || "",
-      bonoId: "",
-      date: presetDate || todayISO(),
-      time: "10:00",
-      duration: 60,
-      place: "",
-      price: "",
-      status: "programada",
-      notes: "",
-    }
+    initial ||
+      // `plantilla` llega al repetir la última sesión de un cliente.
+      plantilla || {
+        id: uid(),
+        clientId: presetClient || clients[0]?.id || "",
+        bonoId: "",
+        date: presetDate || todayISO(),
+        time: "10:00",
+        duration: porDefecto.duration || 60,
+        place: porDefecto.place || "",
+        price: porDefecto.price ?? "",
+        status: "programada",
+        notes: "",
+      }
   );
   const [cobrada, setCobrada] = useState(initial ? isSessionPaid(data, initial) : false);
   const [repeat, setRepeat] = useState("no");

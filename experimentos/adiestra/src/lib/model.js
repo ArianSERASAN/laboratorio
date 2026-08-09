@@ -14,7 +14,11 @@ export const METHODS = ["efectivo", "bizum", "transferencia", "tarjeta"];
 
 export const EMPTY = {
   version: SCHEMA_VERSION,
-  settings: { theme: "auto" },
+  settings: {
+    theme: "auto",
+    // Lo que se repite en casi todas las sesiones, para no teclearlo cada vez.
+    defaults: { duration: 60, price: "", place: "" },
+  },
   clients: [],
   bonos: [],
   sessions: [],
@@ -45,7 +49,11 @@ export function normalize(raw) {
   const data = {
     ...EMPTY,
     ...raw,
-    settings: { ...EMPTY.settings, ...(raw.settings || {}) },
+    settings: {
+      ...EMPTY.settings,
+      ...(raw.settings || {}),
+      defaults: { ...EMPTY.settings.defaults, ...(raw.settings?.defaults || {}) },
+    },
     clients: arr(raw.clients),
     bonos: arr(raw.bonos),
     sessions: arr(raw.sessions),

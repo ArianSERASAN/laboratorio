@@ -95,18 +95,25 @@ del propio proyecto.
 
 - **Hoy**: sesiones del día, seguimientos vencidos, próximas citas y el dinero
   pendiente de un vistazo.
-- **Agenda**: calendario mensual, sesiones por día y exportación al calendario
-  del móvil en `.ics`, con aviso una hora antes. Los avisos de seguimiento
-  también se exportan: es la manera de que el iPhone avise, porque una web
-  instalada no puede programar notificaciones por su cuenta.
+- **Agenda**: calendario mensual o lista de los próximos siete días, y
+  exportación al calendario del móvil en `.ics` con aviso una hora antes. Los
+  avisos de seguimiento también se exportan: es la manera de que el iPhone
+  avise, porque una web instalada no puede programar notificaciones por su
+  cuenta.
 - **Clientes**: fichas del perro y del guía, con buscador que entra también en
   las notas de progreso, filtros por deuda o por falta de próxima cita, y
   llamada o WhatsApp directos.
 - **Bonos y programas**: tarjeta de sesiones consumidas, cuánto queda por usar
   y cuánto por cobrar. Aviso al cargar más sesiones de las que quedan.
 - **Cobros**: pendiente por cliente, cobros parciales con fecha y método,
-  ingresos de los últimos seis meses y deshacer de un cobro mal apuntado.
-- **Sesiones repetidas**: crear de golpe una serie semanal o quincenal.
+  ingresos de los últimos seis meses, deshacer de un cobro mal apuntado y
+  exportación a CSV para la gestoría.
+- **Sesiones repetidas**: crear de golpe una serie semanal o quincenal, o
+  repetir la última de un cliente una semana después con un toque.
+- **Todo lo que borra se puede deshacer** durante unos segundos: fichas,
+  sesiones, bonos, cobros e incluso vaciar el cuaderno entero.
+- **Valores por defecto** (duración, precio suelto y lugar) para que una
+  sesión nueva llegue medio rellenada.
 - **Modo claro y oscuro**, automático o fijado a mano.
 
 ---
