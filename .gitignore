@@ -23,3 +23,5 @@ venv/
 # Entorno
 .env
 .env.local
+
+dist-single/
