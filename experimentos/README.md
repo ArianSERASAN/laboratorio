@@ -3,6 +3,12 @@
 Una carpeta por experimento, con su propio `README.md` y sus propias
 dependencias. Nada se instala en la raíz del repositorio.
 
+## Índice
+
+- [`adiestra/`](adiestra/) — Cuaderno de campo de adiestramiento canino. App
+  instalable en el móvil (PWA), sin conexión y con los datos guardados en el
+  propio teléfono.
+
 Plantilla sugerida para el `README.md` de cada experimento:
 
 ```markdown
