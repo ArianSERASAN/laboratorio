@@ -28,6 +28,7 @@ npm run build    # compila a dist/ y sella el service worker
 npm run preview  # sirve dist/ para probar la versión final
 npm run icons    # regenera los PNG del icono (sólo si cambia el diseño)
 
+npm run publish       # compila y deja el resultado en docs/, listo para publicar
 npm run build:single  # empaqueta todo en dist-single/cuaderno-de-campo.html
 ```
 
@@ -38,16 +39,25 @@ la app no cachea nada, que es lo cómodo mientras se toca el código.
 
 ## Cómo tenerla en el móvil
 
-Hace falta servirla por HTTPS. El repositorio trae un flujo de GitHub Actions
-(`.github/workflows/deploy-adiestra.yml`) que la publica en GitHub Pages en
-cada push a `main`.
+Hace falta servirla por HTTPS. Se publica en GitHub Pages desde la carpeta
+`docs/` de la raíz del repositorio, sin pasar por GitHub Actions: se compila
+aquí, se commitea el resultado y con el push queda publicado.
 
-1. En GitHub: **Settings → Pages → Source: GitHub Actions**.
-2. Empuja a `main`. Al terminar el flujo, la app queda en
-   `https://<usuario>.github.io/laboratorio/`.
+```bash
+npm run publish   # compila y vuelca dist/ en ../../docs
+git add docs && git commit -m "Publish app" && git push
+```
+
+1. En GitHub, una sola vez: **Settings → Pages → Source: Deploy from a
+   branch → `main` / `/docs`**.
+2. La app queda en `https://<usuario>.github.io/laboratorio/`.
 3. En el iPhone, abre esa dirección **en Safari** (no en Chrome), toca el botón
    de compartir y elige **Añadir a pantalla de inicio**.
 4. En Android: menú del navegador → **Instalar aplicación**.
+
+Se hizo así, y no con un flujo de Actions, porque publicar por Actions sube un
+artefacto en cada despliegue y eso consume la cuota de almacenamiento de la
+cuenta. Servir `docs/` no gasta nada.
 
 A partir de ahí abre a pantalla completa, con su icono, y funciona en el campo
 aunque no haya cobertura. Vale cualquier otro alojamiento estático (Netlify,
@@ -130,7 +140,9 @@ del propio proyecto.
   eso el modo oscuro es sólo otro juego de valores.
 - **Service worker propio** en lugar de un plugin: precarga la lista exacta de
   archivos compilados y la versión sale del hash de su contenido, así que cada
-  despliegue invalida la caché anterior sin trucos.
+  despliegue invalida la caché anterior sin trucos. La página de arranque se
+  guarda por su carpeta y no por `index.html`: es la URL que pide el navegador
+  al abrir la app, y una respuesta redirigida no vale para navegar.
 - **Rutas relativas en todo** (`base: "./"`), para poder alojarla en cualquier
   sitio.
 
@@ -149,7 +161,8 @@ public/
   fonts/            tipografías locales (subconjunto latino)
   icons/            iconos generados
   sw.js             service worker; la lista de archivos se rellena al compilar
-scripts/            generación de iconos y sellado del service worker
+docs/               (en la raíz del repo) copia publicada en GitHub Pages
+scripts/            iconos, sellado del service worker y publicación
 ```
 
 ---

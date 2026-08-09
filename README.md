@@ -26,5 +26,5 @@ En marcha. Experimentos activos:
 
 - `experimentos/adiestra/` — **Cuaderno de campo**: agenda, fichas, bonos y
   cobros de adiestramiento canino. App instalable en el móvil, funciona sin
-  conexión y guarda los datos en el propio teléfono. Se publica sola en GitHub
-  Pages con `.github/workflows/deploy-adiestra.yml`.
+  conexión y guarda los datos en el propio teléfono. La copia publicada vive en
+  `docs/`, que es lo que sirve GitHub Pages.
