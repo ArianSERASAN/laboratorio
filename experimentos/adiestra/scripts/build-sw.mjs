@@ -32,10 +32,14 @@ for (const f of archivos) {
 }
 const version = hash.digest("hex").slice(0, 10);
 
+// `index.html` se precarga como la carpeta que lo contiene: es lo que pide el
+// navegador al abrir la app, y así la respuesta guardada sirve para navegar.
+const precarga = archivos.map((f) => (f === "index.html" ? "./" : "./" + f));
+
 const swPath = join(DIST, "sw.js");
 const sw = (await readFile(swPath, "utf8"))
   .replace('const VERSION = "dev";', `const VERSION = "${version}";`)
-  .replace("const ASSETS = [];", `const ASSETS = ${JSON.stringify(archivos.map((f) => "./" + f))};`);
+  .replace("const ASSETS = [];", `const ASSETS = ${JSON.stringify(precarga)};`);
 
 await writeFile(swPath, sw);
 

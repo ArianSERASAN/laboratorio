@@ -4,8 +4,8 @@
  * de compilar; en desarrollo este archivo se sirve tal cual y no cachea nada.
  */
 
-const VERSION = "dev";
-const ASSETS = [];
+const VERSION = "ddb0918f3c";
+const ASSETS = ["./assets/index-C0tdaMmj.js","./assets/index-D3spNi02.css","./fonts/bricolage-grotesque.woff2","./fonts/dm-mono-400.woff2","./fonts/dm-mono-500.woff2","./fonts/fonts.css","./fonts/public-sans.woff2","./icons/apple-touch-icon.png","./icons/icon-192.png","./icons/icon-512.png","./icons/icon.svg","./icons/maskable-192.png","./icons/maskable-512.png","./","./manifest.webmanifest"];
 const CACHE = `cuaderno-${VERSION}`;
 // La carpeta, no `index.html`: es la URL que pide el navegador al abrir la app.
 // Guardar la otra deja una respuesta redirigida, que no vale para una

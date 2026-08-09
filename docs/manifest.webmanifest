@@ -1,0 +1,27 @@
+{
+  "name": "Cuaderno de campo · adiestramiento",
+  "short_name": "Cuaderno",
+  "description": "Agenda, fichas, bonos y cobros de adiestramiento canino. Funciona sin conexión.",
+  "lang": "es-ES",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "id": "adiestra-cuaderno",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#EFEFE9",
+  "theme_color": "#13201B",
+  "categories": ["productivity", "business"],
+  "icons": [
+    { "src": "./icons/icon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "./icons/maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "./icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Nueva sesión", "short_name": "Sesión", "url": "./?nuevo=sesion" },
+    { "name": "Nuevo cliente", "short_name": "Cliente", "url": "./?nuevo=cliente" },
+    { "name": "Cobros", "short_name": "Cobros", "url": "./?tab=cobros" }
+  ]
+}
