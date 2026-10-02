@@ -28,3 +28,5 @@ En marcha. Experimentos activos:
   cobros de adiestramiento canino. App instalable en el móvil, funciona sin
   conexión y guarda los datos en el propio teléfono. La copia publicada vive en
   `docs/`, que es lo que sirve GitHub Pages.
+- `experimentos/consejero-sesion/` — **Consejero de sesión**: mod de Claude
+  Code con buenas prácticas sobre cuándo cambiar de chat o de modelo.

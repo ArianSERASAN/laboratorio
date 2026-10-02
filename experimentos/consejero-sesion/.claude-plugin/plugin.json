@@ -1,0 +1,46 @@
+{
+  "name": "consejero-sesion",
+  "displayName": "Consejero de sesión",
+  "version": "0.1.0",
+  "description": "Avisa de cuándo limpiar o compactar el chat, cambiar de modelo y cuidar los límites de uso, con botones para actuar",
+  "author": { "name": "ArianSERASAN" },
+  "license": "MIT",
+  "keywords": ["contexto", "modelos", "buenas-practicas"],
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "umbrales": {
+      "type": "string",
+      "title": "Umbrales de contexto",
+      "description": "conservador 80K/150K, equilibrado 150K/300K, holgado 300K/600K tokens (aviso suave/urgente)",
+      "options": ["equilibrado", "conservador", "holgado"],
+      "default": "equilibrado"
+    },
+    "clasificador": {
+      "type": "string",
+      "title": "Clasificador para casos dudosos",
+      "description": "haiku (sin configurar), jev (TypeSafe vía Vercel AI Gateway, experimental) o ninguno (solo heurística)",
+      "options": ["haiku", "jev", "ninguno"],
+      "default": "haiku"
+    },
+    "jev_api_key": {
+      "type": "string",
+      "title": "API key de Vercel AI Gateway (Jev)",
+      "description": "Solo si el clasificador es jev. El texto de los prompts dudosos se envía a Vercel y TypeSafe",
+      "sensitive": true
+    },
+    "jev_confianza": {
+      "type": "number",
+      "title": "Confianza mínima de Jev",
+      "description": "Probabilidad mínima (0,5 a 0,99) para que una respuesta de Jev cuente como sí",
+      "min": 0.5,
+      "max": 0.99,
+      "default": 0.75
+    },
+    "preguntar_tema_nuevo": {
+      "type": "boolean",
+      "title": "Preguntar antes de enviar una tarea nueva",
+      "description": "Si un prompt parece una tarea nueva con mucho contexto acumulado, pregunta si enviarlo aquí o en un chat limpio",
+      "default": true
+    }
+  }
+}
